@@ -1,0 +1,126 @@
+
+/* ===== CSS ORIGINAL DEL JUEGO ===== */
+body {
+    margin: 0;
+    background: url(img/fondo.jpg) no-repeat center;
+    background-size: cover;
+    font-family: 'Carter One', Arial, Helvetica, sans-serif;
+    min-height: 100vh; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header {
+    background-color: black;
+    padding: 10px;
+    text-align: center;
+    margin-top: 20px;
+    border-radius: 8px;
+}
+
+h1 {
+    margin: 0;
+    color: white;
+}
+
+main {
+    width: 90%;
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.game-info {
+    text-align: center;
+}
+
+#imagen {
+    width: 300px;
+    height: auto;
+}
+
+#pistas {
+    margin-bottom: 20px;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+#palabra_a_adivinar {
+    height: 3em;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+#palabra_a_adivinar span {
+    vertical-align: bottom;
+    font-size: 2em;
+    border-bottom: 2px solid black;
+    width: 30px;
+    text-align: center;
+    display: inline-block;
+}
+
+#letras {
+    margin-top: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+#letras button, .button-group button {
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 1em;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+#letras button:hover:not(:disabled), .button-group button:hover:not(:disabled) {
+    background-color: #555;
+}
+
+#letras button:disabled, .button-group button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+#resultado {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+#cronometro {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+.button-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+
