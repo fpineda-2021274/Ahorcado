@@ -1,18 +1,13 @@
 package com.FranklinPineda.Ahorcado;
 
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootApplication
-public class AhorcadoProyectoApplication implements CommandLineRunner {
+@SpringBootTest
+class AhorcadoApplicationTest {
 
-    public static void main(String[] args) {
-        SpringApplication.run(AhorcadoProyectoApplication.class, args);
+    @Test
+    void contextLoads() {
     }
 
-    @Override
-    public void run(String... args) throws Exception {
-        System.out.println("Api ejecutandose correctamente");
-    }
 }

@@ -1,15 +1,15 @@
 package com.FranklinPineda.Ahorcado.Model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
+@Entity
+@Table(name = "Usuario")
 public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @Column(name = "codigo_Usuario")
+    private Integer codigoUsuario;
 
     @Column(name = "nombre")
     private String nombre;
@@ -21,14 +21,16 @@ public class Usuario {
     private String correo;
 
     @Column(name = "pass")
-    private Integer pass;
+    private String pass;
 
-    public Integer getId() {
-        return id;
+    // GETTERS AND SETTERS
+
+    public Integer getCodigoUsuario() {
+        return codigoUsuario;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setCodigoUsuario(Integer codigoUsuario) {
+        this.codigoUsuario = codigoUsuario;
     }
 
     public String getNombre() {
@@ -55,11 +57,11 @@ public class Usuario {
         this.correo = correo;
     }
 
-    public Integer getPass() {
+    public String getPass() {
         return pass;
     }
 
-    public void setPass(Integer pass) {
+    public void setPass(String pass) {
         this.pass = pass;
     }
 }

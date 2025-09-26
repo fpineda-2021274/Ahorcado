@@ -1,34 +1,36 @@
 package com.FranklinPineda.Ahorcado.Model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
+@Entity
+@Table(name = "Palabra")
 public class Palabra {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @Column(name = "codigo_Palabra")
+    private Integer codigoPalabra;
 
     @Column(name = "palabra")
     private String palabra;
 
-    @Column(name = "pista1")
+    @Column(name = "pista_1")
     private String pista1;
 
-    @Column(name = "pista2")
+    @Column(name = "pista_2")
     private String pista2;
 
-    @Column(name = "pista3")
+    @Column(name = "pista_3")
     private String pista3;
 
-    public Integer getId() {
-        return id;
+    // GETTERS AND SETTERS
+
+    public Integer getCodigoPalabra() {
+        return codigoPalabra;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setCodigoPalabra(Integer codigoPalabra) {
+        this.codigoPalabra = codigoPalabra;
     }
 
     public String getPalabra() {
