@@ -14,10 +14,10 @@
        <title>AHORCADO</title>
 </head>
 <body>
-    <header>
+<header>
         <h1>AHORCADO</h1>
     </header>
-    <section class="AHORCADO"></section>
+
     <main>
         <div class="game-container">
             <img id="imagen" src="img/base.png" alt="AHORCADO">
@@ -30,40 +30,23 @@
                     <button id="jugar">Jugar</button>
                     <button id="reiniciar" disabled>Reiniciar</button>
                     <button id="pausa" disabled>Pausa</button>
+                    <button id="actualizar">Actualizar</button>
                 </div>
             </div>
         </div>
+
         <div id="letras">
-            <button>A</button>
-            <button>B</button>
-            <button>C</button>
-            <button>D</button>
-            <button>E</button>
-            <button>F</button>
-            <button>G</button>
-            <button>H</button>
-            <button>I</button>
-            <button>J</button>
-            <button>K</button>
-            <button>L</button>
-            <button>M</button>
-            <button>N</button>
-            <button>Ñ</button>
-            <button>O</button>
-            <button>P</button>
-            <button>Q</button>
-            <button>R</button>
-            <button>S</button>
-            <button>T</button>
-            <button>U</button>
-            <button>V</button>
-            <button>W</button>
-            <button>X</button>
-            <button>Y</button>
-            <button>Z</button>
+            <button>A</button><button>B</button><button>C</button><button>D</button>
+            <button>E</button><button>F</button><button>G</button><button>H</button>
+            <button>I</button><button>J</button><button>K</button><button>L</button>
+            <button>M</button><button>N</button><button>Q</button><button>O</button>
+            <button>P</button><button>Q</button><button>R</button><button>S</button>
+            <button>T</button><button>U</button><button>V</button><button>W</button>
+            <button>X</button><button>Y</button><button>Z</button>
         </div>
     </main>
-    <script src="juego.js"></script>
+
+    <script src="script/juego.js"></script>
 
     <script>
     // Verifica si el usuario inició sesión
