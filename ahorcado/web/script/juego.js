@@ -1,181 +1,237 @@
-// Ahora las palabras se leen desde la base de datos a través de la página JSP.
-// La variable 'palabrasDelDB' ya está definida en el HTML antes de este script.
-
-const imagen = document.getElementById("imagen");
-const palabraAdivinar = document.getElementById("palabra_a_adivinar");
-const resultadoTexto = document.getElementById("resultado");
-const pistasDiv = document.getElementById("pistas");
-const cronometro = document.getElementById("cronometro");
-const letrasDiv = document.getElementById("letras");
-const botonJugar = document.getElementById("jugar");
-const botonReiniciar = document.getElementById("reiniciar");
-const botonPausa = document.getElementById("pausa");
-
-let palabraActual = {};
-let palabraOculta = [];
-let errores = 0;
-let tiempo = 0;
-let intervaloCronometro;
-let juegoPausado = false;
-let juegoTerminado = false;
-
-// Array de rutas de imágenes del ahorcado
+// ==============================================================================
+// 1. VARIABLES GLOBALES Y LISTA DE PALABRAS (Compatibilidad Máxima)
+// ==============================================================================
 const imagenesAhorcado = [
-    "/img/base.png",
-    "/img/1.png",
-    "/img/2.png",
-    "/img/3.png",
-    "/img/4.png",
-    "/img/5.png",
-    "/img/6.png"
+    "img/base.png", // Imagen inicial
+    "img/1.png",
+    "img/2.png",
+    "img/3.png",
+    "img/4.png",
+    "img/5.png",
+    "img/6.png"
 ];
 
-// --- Funciones del juego ---
+// LISTA DE PALABRAS 100% SEGURA: No tiene caracteres especiales (tildes, ñ)
+let palabras = [
+    { palabra: "mariposa", pistas: ["insecto", "alas coloridas", "vuela en jardines"] },
+    { palabra: "elefante", pistas: ["animal grande", "trompa larga", "vive en sabana"] },
+    { palabra: "computador", pistas: ["maquina", "procesa datos", "usa electricidad"] }, // 'maquina' sin tilde
+    { palabra: "cocodrilo", pistas: ["reptil", "vive en rios", "tiene dientes filosos"] }, // 'rios' sin tilde
+    { palabra: "sandwich", pistas: ["comida", "pan relleno", "rapido de preparar"] }, // 'rapido' sin tilde
+    { palabra: "jirafona", pistas: ["animal", "cuello largo", "vive en africa"] },
+    { palabra: "volcanico", pistas: ["naturaleza", "montana", "erupcion de lava"] }, // 'montaña' y 'erupción' sin caracteres especiales
+    { palabra: "esmeralda", pistas: ["piedra preciosa", "verde", "muy valiosa"] },
+    { palabra: "camisetas", pistas: ["ropa", "algodon", "se usa en verano"] },
+    { palabra: "astronauta", pistas: ["profesion", "espacio", "traje especial"] },
+    { palabra: "carretera", pistas: ["camino", "autos", "asfalto"] },
+    { palabra: "murcielago", pistas: ["animal", "vuela", "nocturno"] },
+    { palabra: "pantallas", pistas: ["tecnologia", "televisor", "dispositivo visual"] },
+    { palabra: "cangrejos", pistas: ["animal", "tenazas", "mariscos"] },
+    { palabra: "microscopio", pistas: ["instrumento", "ciencia", "mira lo pequeno"] }, // 'pequeño' sin 'ñ'
+    { palabra: "universos", pistas: ["espacio", "estrellas", "planetas"] },
+    { palabra: "camisones", pistas: ["ropa", "para dormir", "muy comoda"] },
+    { palabra: "orquideas", pistas: ["flores", "decoracion", "colores vivos"] },
+    { palabra: "girasoles", pistas: ["plantas", "amarillas", "siguen al sol"] },
+    { palabra: "escaleras", pistas: ["subir", "escalones", "arquitectura"] }
+];
 
-function iniciarJuego() {
-    // Si no hay palabras de la base de datos, no se puede iniciar el juego.
-    if (!palabrasDelDB_Juego || palabrasDelDB_Juego.length === 0) {
-        resultadoTexto.textContent = "No hay palabras disponibles en la base de datos. Por favor, agregue algunas.";
-        resultadoTexto.style.color = "red";
-        return; // Detiene la ejecución si no hay palabras
-    }
+let palabraSeleccionada = ""; // Se inicializa vacía, se llenará en iniciarJuego
+let pistasSeleccionadas = [];
+let letrasAdivinadas = [];
+let intentosIncorrectos = 0;
+let tiempo = 0;
+let intervalo;
+let juegoPausado = true;
 
-    // Restablecer el estado del juego
-    errores = 0;
-    tiempo = 0;
-    juegoPausado = false;
-    juegoTerminado = false;
-    palabraOculta = [];
-    resultadoTexto.textContent = "";
-    pistasDiv.textContent = "";
-    imagen.src = imagenesAhorcado[0];
 
-    // Habilitar y deshabilitar botones
-    botonJugar.disabled = true;
-    botonReiniciar.disabled = false;
-    botonPausa.disabled = false;
-    
-    // Habilitar los botones de las letras
-    letrasDiv.querySelectorAll('button').forEach(btn => {
-        btn.disabled = false;
-        btn.style.opacity = "1";
-    });
+// ==============================================================================
+// 2. LÓGICA DE PALABRA Y PISTAS
+// ==============================================================================
 
-    // Elegir una palabra al azar de la lista de la base de datos
-    const indiceAleatorio = Math.floor(Math.random() * palabrasDelDB_Juego.length);
-    palabraActual = palabrasDelDB_Juego[indiceAleatorio];
+function seleccionarPalabra() {
+    const indice = Math.floor(Math.random() * palabras.length);
+    let palabraOriginal = palabras[indice].palabra.toLowerCase();
+    pistasSeleccionadas = palabras[indice].pistas;
 
-    // Ocultar la palabra
-    for (let i = 0; i < palabraActual.palabra.length; i++) {
-        palabraOculta.push("_");
-    }
-    actualizarPalabraOculta();
+    // Normalizamos para asegurar que las letras del teclado coincidan, aunque la palabra ya no tenga tilde.
+    palabraSeleccionada = palabraOriginal.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-    // Mostrar las pistas
     mostrarPistas();
-
-    // Iniciar el cronómetro
-    iniciarCronometro();
-}
-
-function actualizarPalabraOculta() {
-    palabraAdivinar.textContent = palabraOculta.join(" ");
 }
 
 function mostrarPistas() {
-    pistasDiv.innerJSP = "<h4>Pistas:</h4>";
-    palabraActual.pistas.forEach(pista => {
-        if(pista && pista.trim() !== "") {
-            pistasDiv.innerHTML += `<p>- ${pista}</p>`;
-        }
+    const pistasDiv = document.getElementById('pistas');
+    if (!pistasDiv) return;
+
+    pistasDiv.innerHTML = '<h2>Pistas:</h2>'; // Añadimos un título de pistas
+    pistasSeleccionadas.forEach((pista, i) => {
+        const p = document.createElement('p');
+        // Usamos la pista original (que puede tener tilde si la pusiste en el JS)
+        p.textContent = `Pista ${i + 1}: ${pista}`;
+        pistasDiv.appendChild(p);
     });
 }
 
-function comprobarLetra(letra) {
-    if (juegoTerminado || juegoPausado) return;
 
-    const letraMayus = letra.toUpperCase();
-    let acierto = false;
-    
-    // Recorrer la palabra para ver si la letra está presente
-    for (let i = 0; i < palabraActual.palabra.length; i++) {
-        if (palabraActual.palabra[i] === letraMayus) {
-            palabraOculta[i] = letraMayus;
-            acierto = true;
-        }
-    }
+// ==============================================================================
+// 3. FUNCIONES DE JUEGO
+// ==============================================================================
 
-    if (acierto) {
-        actualizarPalabraOculta();
-        if (palabraOculta.join("") === palabraActual.palabra) {
-            // Ganó el juego
-            juegoTerminado = true;
-            resultadoTexto.textContent = "¡Felicitaciones, has ganado! 🎉";
-            resultadoTexto.style.color = "green";
-            finalizarJuego();
-        }
-    } else {
-        // Falló la letra
-        errores++;
-        imagen.src = imagenesAhorcado[errores];
-        if (errores === imagenesAhorcado.length - 1) {
-            // Perdió el juego
-            juegoTerminado = true;
-            resultadoTexto.textContent = `¡Has perdido! La palabra era: ${palabraActual.palabra} 😢`;
-            resultadoTexto.style.color = "red";
-            finalizarJuego();
-        }
+function iniciarJuego() {
+    try {
+        // Resetear variables
+        intentosIncorrectos = 0;
+        letrasAdivinadas = [];
+        tiempo = 0;
+        juegoPausado = false;
+
+        // Limpiamos el intervalo anterior (importante si se llama desde 'Reiniciar')
+        clearInterval(intervalo); 
+
+        // Resetear elementos del DOM
+        document.getElementById('cronometro').textContent = 'Tiempo: 00:00';
+        document.getElementById('imagen').src = imagenesAhorcado[0];
+        document.getElementById('resultado').textContent = '';
+        document.getElementById('resultado').style.color = 'inherit';
+
+        // Selecciona una PALABRA NUEVA y sus PISTAS
+        seleccionarPalabra();
+        actualizarPalabra();
+        cronometro();
+
+        // Habilitar / Deshabilitar botones de control
+        document.getElementById('jugar').disabled = true;
+        document.getElementById('reiniciar').disabled = false;
+        document.getElementById('pausa').disabled = false;
+        document.getElementById('pausa').textContent = 'Pausa';
+        document.getElementById('actualizar').disabled = false;
+
+        document.querySelectorAll('#letras button').forEach((btn) => btn.disabled = false);
+
+    } catch (e) {
+        console.error("Error crítico al iniciar el juego:", e);
+        document.getElementById('resultado').textContent = 'Error: No se pudo iniciar el juego. Revisa la consola (F12).';
+        document.getElementById('resultado').style.color = '#f44336';
     }
 }
 
-function iniciarCronometro() {
-    clearInterval(intervaloCronometro);
-    intervaloCronometro = setInterval(() => {
-        tiempo++;
-        const minutos = Math.floor(tiempo / 60).toString().padStart(2, '0');
-        const segundos = (tiempo % 60).toString().padStart(2, '0');
-        cronometro.textContent = `Tiempo: ${minutos}:${segundos}`;
+function cronometro() {
+    if (juegoPausado) return;
+    clearInterval(intervalo);
+    intervalo = setInterval(() => {
+        if (!juegoPausado) {
+            tiempo++;
+            let minutos = Math.floor(tiempo / 60);
+            let segundos = tiempo % 60;
+            // Corregido: El padStart debe usar '0' y no '60' para rellenar
+            document.getElementById('cronometro').textContent = `Tiempo: ${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+        }
     }, 1000);
 }
 
-function pausarJuego() {
-    if (juegoPausado) {
-        iniciarCronometro();
-        botonPausa.textContent = "Pausa";
-        juegoPausado = false;
-        letrasDiv.querySelectorAll('button').forEach(btn => btn.disabled = false);
-    } else {
-        clearInterval(intervaloCronometro);
-        botonPausa.textContent = "Reanudar";
-        juegoPausado = true;
-        letrasDiv.querySelectorAll('button').forEach(btn => btn.disabled = true);
+function actualizarPalabra() {
+    const palabraDiv = document.getElementById('palabra_a_adivinar');
+    if (!palabraDiv) return;
+
+    let palabraOculta = '';
+    for (let i = 0; i < palabraSeleccionada.length; i++) {
+        palabraOculta += letrasAdivinadas.includes(palabraSeleccionada[i]) ? palabraSeleccionada[i].toUpperCase() : '_';
+        palabraOculta += ' ';
     }
+    palabraDiv.textContent = palabraOculta.trim();
+}
+
+function errores() {
+    intentosIncorrectos++;
+
+    if (intentosIncorrectos < imagenesAhorcado.length) {
+        document.getElementById('imagen').src = imagenesAhorcado[intentosIncorrectos];
+    } else {
+        document.getElementById('resultado').textContent = '¡PERDISTE! La palabra era: ' + palabraSeleccionada.toUpperCase();
+        document.getElementById('resultado').style.color = '#f44336';
+        finalizarJuego();
+    }
+}
+
+function verificarVictoria() {
+    return palabraSeleccionada.split('').every(letra => letrasAdivinadas.includes(letra));
 }
 
 function finalizarJuego() {
-    clearInterval(intervaloCronometro);
-    botonJugar.disabled = false;
-    botonPausa.disabled = true;
-    letrasDiv.querySelectorAll('button').forEach(btn => btn.disabled = true);
+    clearInterval(intervalo);
+    document.querySelectorAll('#letras button').forEach((btn) => btn.disabled = true);
+    document.getElementById('pausa').disabled = true;
+    document.getElementById('jugar').disabled = false;
+    juegoPausado = true;
 }
 
-// --- Event Listeners ---
 
-// Botón de jugar
-botonJugar.addEventListener("click", iniciarJuego);
+// ==============================================================================
+// 4. ASIGNACIÓN DE EVENTOS
+// ==============================================================================
 
-// Botón de reiniciar
-botonReiniciar.addEventListener("click", iniciarJuego);
+document.addEventListener('DOMContentLoaded', () => {
 
-// Botón de pausa
-botonPausa.addEventListener("click", pausarJuego);
+    // Asignar letras a los botones (Teclado)
+    document.querySelectorAll('#letras button').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            if (!juegoPausado) {
+                const letra = btn.textContent.toLowerCase();
 
-// Botones de las letras
-letrasDiv.addEventListener("click", (e) => {
-    if (e.target.tagName === "BUTTON" && !e.target.disabled) {
-        const letra = e.target.textContent;
-        comprobarLetra(letra);
-        e.target.disabled = true;
-        e.target.style.opacity = "0.5";
-    }
+                // CRÍTICO: Normalizar la letra del teclado si fuera una 'Ñ' o una letra con tilde
+                const letraLimpia = letra.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+                if (letrasAdivinadas.includes(letraLimpia)) return;
+
+                letrasAdivinadas.push(letraLimpia);
+                btn.disabled = true;
+
+                if (!palabraSeleccionada.includes(letraLimpia)) {
+                    errores();
+                }
+
+                actualizarPalabra();
+
+                if (verificarVictoria()) {
+                    document.getElementById('resultado').textContent = '¡GANASTE! 🎉';
+                    document.getElementById('resultado').style.color = '#4CAF50';
+                    finalizarJuego();
+                }
+            }
+        });
+    });
+
+    // Botón "Reiniciar"
+    document.getElementById('reiniciar')?.addEventListener('click', () => {
+        iniciarJuego();
+    });
+
+    // Botón "Pausar"
+    document.getElementById('pausa')?.addEventListener('click', () => {
+        const pausaBtn = document.getElementById('pausa');
+        // Solo permitir pausa si el juego NO ha finalizado (botón jugar está deshabilitado)
+        if (document.getElementById('jugar').disabled) {
+            juegoPausado = !juegoPausado;
+            if (juegoPausado) {
+                clearInterval(intervalo);
+                pausaBtn.textContent = 'Reanudar';
+            } else {
+                cronometro();
+                pausaBtn.textContent = 'Pausa';
+            }
+        }
+    });
+
+    // Botón "Actualizar"
+    document.getElementById('actualizar')?.addEventListener('click', () => {
+        location.reload();
+    });
+
+    // Evento para el botón "Jugar"
+    document.getElementById('jugar')?.addEventListener('click', iniciarJuego);
+
+    // ==================================================
+    // 💡 CAMBIO CLAVE: Iniciamos el juego con TODO el setup
+    // ==================================================
+    iniciarJuego(); 
 });
